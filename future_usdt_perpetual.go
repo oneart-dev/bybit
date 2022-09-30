@@ -25,6 +25,7 @@ type FutureUSDTPerpetualServiceI interface {
 	ListLinearPositions() (*ListLinearPositionsResponse, error)
 	SaveLinearLeverage(SaveLinearLeverageParam) (*SaveLinearLeverageResponse, error)
 	LinearExecutionList(LinearExecutionListParam) (*LinearExecutionListResponse, error)
+	LinearExecutionHistoryList(param LinearExecutionHistoryListParam) (*LinearExecutionHistoryListResponse, error)
 
 	// Wallet Data Endpoints
 	Balance(Coin) (*BalanceResponse, error)
