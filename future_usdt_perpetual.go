@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/url"
+	"strconv"
 )
 
 // FutureUSDTPerpetualServiceI :
@@ -246,6 +247,84 @@ func (s *FutureUSDTPerpetualService) SaveLinearLeverage(param SaveLinearLeverage
 	return &res, nil
 }
 
+// LinearExecutionHistoryListResponse :
+type LinearExecutionHistoryListResponse struct {
+	CommonResponse `json:",inline"`
+	Result         LinearExecutionListResult `json:"result"`
+}
+
+// LinearExecutionHistoryListResult :
+type LinearExecutionHistoryListResult struct {
+	PageToken            string                `json:"page_token"`
+	LinearExecutionLists []LinearExecutionList `json:"data"`
+}
+
+// LinearExecutionHistoryList :
+type LinearExecutionHistoryList struct {
+	OrderID          string     `json:"order_id"`
+	OrderLinkID      string     `json:"order_link_id"`
+	Side             Side       `json:"side"`
+	Symbol           SymbolUSDT `json:"symbol"`
+	OrderPrice       float64    `json:"order_price"`
+	OrderQty         float64    `json:"order_qty"`
+	OrderType        OrderType  `json:"order_type"`
+	FeeRate          float64    `json:"fee_rate"`
+	ExecPrice        float64    `json:"exec_price"`
+	ExecType         ExecType   `json:"exec_type"`
+	ExecQty          float64    `json:"exec_qty"`
+	ExecFee          float64    `json:"exec_fee"`
+	ExecValue        float64    `json:"exec_value"`
+	LeavesQty        float64    `json:"leaves_qty"`
+	ClosedSize       float64    `json:"closed_size"`
+	LastLiquidityInd string     `json:"last_liquidity_ind"`
+	TradeTimeMs      float64    `json:"trade_time_ms"`
+}
+
+// LinearExecutionHistoryListParam :
+type LinearExecutionHistoryListParam struct {
+	Symbol SymbolUSDT `json:"symbol"`
+
+	StartTime *int      `json:"start_time"`
+	EndTime   *int      `json:"end_time"`
+	ExecType  *ExecType `json:"exec_type"`
+	PageToken *string   `json:"page_token"`
+	Limit     *int      `json:"limit"`
+}
+
+// LinearExecutionHistoryList :
+func (s *FutureUSDTPerpetualService) LinearExecutionHistoryList(param LinearExecutionHistoryListParam) (*LinearExecutionHistoryListResponse, error) {
+	var res LinearExecutionHistoryListResponse
+
+	query := url.Values{}
+	query.Add("symbol", string(param.Symbol))
+
+	if param.StartTime != nil {
+		query.Add("start_time", strconv.Itoa(*param.StartTime))
+	}
+
+	if param.EndTime != nil {
+		query.Add("end_time", strconv.Itoa(*param.EndTime))
+	}
+
+	if param.ExecType != nil {
+		query.Add("exec_type", string(*param.ExecType))
+	}
+
+	if param.PageToken != nil {
+		query.Add("page_token", *param.PageToken)
+	}
+
+	if param.Limit != nil {
+		query.Add("limit", strconv.Itoa(*param.Limit))
+	}
+
+	if err := s.client.getPrivately("/private/linear/trade/execution/history-list", query, &res); err != nil {
+		return nil, err
+	}
+
+	return &res, nil
+}
+
 // LinearExecutionListResponse :
 type LinearExecutionListResponse struct {
 	CommonResponse `json:",inline"`
@@ -291,16 +370,33 @@ type LinearExecutionListParam struct {
 }
 
 // LinearExecutionList :
-// NOTE(TODO) : somehow got EOF 404(path not found)
 func (s *FutureUSDTPerpetualService) LinearExecutionList(param LinearExecutionListParam) (*LinearExecutionListResponse, error) {
 	var res LinearExecutionListResponse
 
-	body, err := json.Marshal(param)
-	if err != nil {
-		return nil, fmt.Errorf("json marshal for LinearExecutionListParam: %w", err)
+	query := url.Values{}
+	query.Add("symbol", string(param.Symbol))
+
+	if param.StartTime != nil {
+		query.Add("start_time", strconv.Itoa(*param.StartTime))
 	}
 
-	if err := s.client.postJSON("/private/linear/trade/execution/list", body, &res); err != nil {
+	if param.EndTime != nil {
+		query.Add("end_time", strconv.Itoa(*param.EndTime))
+	}
+
+	if param.ExecType != nil {
+		query.Add("exec_type", string(*param.ExecType))
+	}
+
+	if param.Page != nil {
+		query.Add("page", strconv.Itoa(*param.Page))
+	}
+
+	if param.Limit != nil {
+		query.Add("limit", strconv.Itoa(*param.Limit))
+	}
+
+	if err := s.client.getPrivately("/private/linear/trade/execution/list", query, &res); err != nil {
 		return nil, err
 	}
 
