@@ -6,8 +6,8 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/hirokisan/bybit"
-	"github.com/hirokisan/bybit/integrationtest-ws/testhelper"
+	"github.com/oneart-dev/bybit"
+	"github.com/oneart-dev/bybit/integrationtest-ws/testhelper"
 	"github.com/stretchr/testify/require"
 )
 

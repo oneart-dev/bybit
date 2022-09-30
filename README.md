@@ -1,5 +1,5 @@
-[![golangci-lint](https://github.com/hirokisan/bybit/actions/workflows/golangci-lint.yml/badge.svg)](https://github.com/hirokisan/bybit/actions/workflows/golangci-lint.yml)
-[![test](https://github.com/hirokisan/bybit/actions/workflows/test.yml/badge.svg)](https://github.com/hirokisan/bybit/actions/workflows/test.yml)
+[![golangci-lint](https://github.com/oneart-dev/bybit/actions/workflows/golangci-lint.yml/badge.svg)](https://github.com/oneart-dev/bybit/actions/workflows/golangci-lint.yml)
+[![test](https://github.com/oneart-dev/bybit/actions/workflows/test.yml/badge.svg)](https://github.com/oneart-dev/bybit/actions/workflows/test.yml)
 
 # bybit
 
@@ -10,7 +10,7 @@ bybit is an bybit client for the Go programing language.
 ### REST API
 
 ```
-import "github.com/hirokisan/bybit"
+import "github.com/oneart-dev/bybit"
 
 client := bybit.NewClient().WithAuth("your api key", "your api secret")
 res, err := client.Future().InversePerpetual().Balance(bybit.CoinBTC)
@@ -21,7 +21,7 @@ res, err := client.Future().InversePerpetual().Balance(bybit.CoinBTC)
 
 for single use
 ```
-import "github.com/hirokisan/bybit"
+import "github.com/oneart-dev/bybit"
 
 wsClient := bybit.NewWebsocketClient()
 svc, err := wsClient.Spot().V1().PublicV1()
@@ -39,7 +39,7 @@ svc.Start(context.Background())
 
 for multiple use
 ```
-import "github.com/hirokisan/bybit"
+import "github.com/oneart-dev/bybit"
 
 wsClient := bybit.NewWebsocketClient()
 
