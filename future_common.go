@@ -149,12 +149,12 @@ type ListKlineResult struct {
 	Symbol   SymbolInverse `json:"symbol"`
 	Interval string        `json:"interval"`
 	OpenTime int           `json:"open_time"`
-	Open     string        `json:"open"`
-	High     string        `json:"high"`
-	Low      string        `json:"low"`
-	Close    string        `json:"close"`
-	Volume   string        `json:"volume"`
-	Turnover string        `json:"turnover"`
+	Open     float64       `json:"open"`
+	High     float64       `json:"high"`
+	Low      float64       `json:"low"`
+	Close    float64       `json:"close"`
+	Volume   float64       `json:"volume"`
+	Turnover float64       `json:"turnover"`
 }
 
 // ListKline :

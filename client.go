@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"net/url"
 	"sort"
@@ -114,12 +115,7 @@ func (c *Client) getPublicly(path string, query url.Values, dst interface{}) err
 	}
 	defer resp.Body.Close()
 
-	if c.debug {
-		fmt.Println("Request: ", u.String())
-		fmt.Println("response Status:", resp.Status)
-		fmt.Println("response Headers:", resp.Header)
-		fmt.Println("response Body:", resp.Body)
-	}
+	c.debugResponse(resp)
 
 	if c.checkResponseForErrors(resp) != nil {
 		return err
@@ -155,12 +151,7 @@ func (c *Client) getPrivately(path string, query url.Values, dst interface{}) er
 		return err
 	}
 
-	if c.debug {
-		fmt.Println("Request: ", u.String())
-		fmt.Println("response Status:", resp.Status)
-		fmt.Println("response Headers:", resp.Header)
-		fmt.Println("response Body:", resp.Body)
-	}
+	c.debugResponse(resp)
 
 	if c.checkResponseForErrors(resp) != nil {
 		return err
@@ -175,7 +166,6 @@ func (c *Client) getPrivately(path string, query url.Values, dst interface{}) er
 
 var ErrTooManyRequests = errors.New("too many requests")
 var ErrServerFail = errors.New("server fail")
-
 
 func (c *Client) checkResponseForErrors(resp *http.Response) error {
 	if resp.StatusCode == 200 {
@@ -214,14 +204,8 @@ func (c *Client) postJSON(path string, body []byte, dst interface{}) error {
 	}
 	defer resp.Body.Close()
 
-	if c.debug {
-		fmt.Println("Request: ", u.String())
-		fmt.Println("Request body: ", string(body))
-		fmt.Println("response Status:", resp.Status)
-		fmt.Println("response Headers:", resp.Header)
-		fmt.Println("response Body:", resp.Body)
-	}
-	
+	c.debugResponse(resp)
+
 	if c.checkResponseForErrors(resp) != nil {
 		return err
 	}
@@ -231,6 +215,17 @@ func (c *Client) postJSON(path string, body []byte, dst interface{}) error {
 	}
 
 	return nil
+}
+
+func (c *Client) debugResponse(resp *http.Response) {
+	if c.debug {
+		fmt.Println("RESPONSE DEBUG INFORMATION:")
+		fmt.Println("Status:", resp.Status)
+		fmt.Println("Headers:", resp.Header)
+		copyBody, _ := resp.Request.GetBody()
+		body, _ := ioutil.ReadAll(copyBody)
+		fmt.Println("Body:", string(body))
+	}
 }
 
 func (c *Client) postForm(path string, body url.Values, dst interface{}) error {
@@ -252,13 +247,7 @@ func (c *Client) postForm(path string, body url.Values, dst interface{}) error {
 	}
 	defer resp.Body.Close()
 
-	if c.debug {
-		fmt.Println("Request: ", u.String())
-		fmt.Println("Request body: ", body.Encode())
-		fmt.Println("response Status:", resp.Status)
-		fmt.Println("response Headers:", resp.Header)
-		fmt.Println("response Body:", resp.Body)
-	}
+	c.debugResponse(resp)
 
 	if c.checkResponseForErrors(resp) != nil {
 		return err
@@ -294,12 +283,7 @@ func (c *Client) deletePrivately(path string, query url.Values, dst interface{})
 	}
 	defer resp.Body.Close()
 
-	if c.debug {
-		fmt.Println("Request: ", u.String())
-		fmt.Println("response Status:", resp.Status)
-		fmt.Println("response Headers:", resp.Header)
-		fmt.Println("response Body:", resp.Body)
-	}
+	c.debugResponse(resp)
 
 	if c.checkResponseForErrors(resp) != nil {
 		return err
