@@ -251,34 +251,13 @@ func (s *FutureUSDTPerpetualService) SaveLinearLeverage(param SaveLinearLeverage
 // LinearExecutionHistoryListResponse :
 type LinearExecutionHistoryListResponse struct {
 	CommonResponse `json:",inline"`
-	Result         LinearExecutionListResult `json:"result"`
+	Result         LinearExecutionHistoryListResult `json:"result"`
 }
 
 // LinearExecutionHistoryListResult :
 type LinearExecutionHistoryListResult struct {
 	PageToken            string                `json:"page_token"`
 	LinearExecutionLists []LinearExecutionList `json:"data"`
-}
-
-// LinearExecutionHistoryList :
-type LinearExecutionHistoryList struct {
-	OrderID          string     `json:"order_id"`
-	OrderLinkID      string     `json:"order_link_id"`
-	Side             Side       `json:"side"`
-	Symbol           SymbolUSDT `json:"symbol"`
-	OrderPrice       float64    `json:"order_price"`
-	OrderQty         float64    `json:"order_qty"`
-	OrderType        OrderType  `json:"order_type"`
-	FeeRate          float64    `json:"fee_rate"`
-	ExecPrice        float64    `json:"exec_price"`
-	ExecType         ExecType   `json:"exec_type"`
-	ExecQty          float64    `json:"exec_qty"`
-	ExecFee          float64    `json:"exec_fee"`
-	ExecValue        float64    `json:"exec_value"`
-	LeavesQty        float64    `json:"leaves_qty"`
-	ClosedSize       float64    `json:"closed_size"`
-	LastLiquidityInd string     `json:"last_liquidity_ind"`
-	TradeTimeMs      float64    `json:"trade_time_ms"`
 }
 
 // LinearExecutionHistoryListParam :
@@ -348,6 +327,7 @@ type LinearExecutionList struct {
 	OrderQty         float64    `json:"order_qty"`
 	OrderType        OrderType  `json:"order_type"`
 	FeeRate          float64    `json:"fee_rate"`
+	ExecID           string     `json:"exec_id"`
 	ExecPrice        float64    `json:"exec_price"`
 	ExecType         ExecType   `json:"exec_type"`
 	ExecQty          float64    `json:"exec_qty"`
@@ -356,7 +336,7 @@ type LinearExecutionList struct {
 	LeavesQty        float64    `json:"leaves_qty"`
 	ClosedSize       float64    `json:"closed_size"`
 	LastLiquidityInd string     `json:"last_liquidity_ind"`
-	TradeTimeMs      float64    `json:"trade_time_ms"`
+	TradeTimeMs      int64      `json:"trade_time_ms"`
 }
 
 // LinearExecutionListParam :
