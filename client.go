@@ -222,9 +222,9 @@ func (c *Client) debugResponse(resp *http.Response) {
 		fmt.Println("RESPONSE DEBUG INFORMATION:")
 		fmt.Println("Status:", resp.Status)
 		fmt.Println("Headers:", resp.Header)
-		copyBody, _ := resp.Request.GetBody()
-		body, _ := ioutil.ReadAll(copyBody)
+		body, _ := ioutil.ReadAll(resp.Body)
 		fmt.Println("Body:", string(body))
+		resp.Body = ioutil.NopCloser(bytes.NewReader(body))
 	}
 }
 
