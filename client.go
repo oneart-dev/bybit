@@ -26,14 +26,21 @@ type Client struct {
 	key        string
 	secret     string
 	httpClient *http.Client
+	debug      bool
 }
 
 // NewClient :
 func NewClient() *Client {
 	return &Client{
-		baseURL: MainNetBaseURL,
+		baseURL:    MainNetBaseURL,
 		httpClient: &http.Client{},
 	}
+}
+
+// SetDebug :
+func (c *Client) Debug() *Client {
+	c.debug = true
+	return c
 }
 
 // WithHTTPClient :
@@ -106,6 +113,13 @@ func (c *Client) getPublicly(path string, query url.Values, dst interface{}) err
 	}
 	defer resp.Body.Close()
 
+	if c.debug {
+		fmt.Println("Request: ", u.String())
+		fmt.Println("response Status:", resp.Status)
+		fmt.Println("response Headers:", resp.Header)
+		fmt.Println("response Body:", resp.Body)
+	}
+
 	if err := json.NewDecoder(resp.Body).Decode(&dst); err != nil {
 		return err
 	}
@@ -131,6 +145,14 @@ func (c *Client) getPrivately(path string, query url.Values, dst interface{}) er
 		return err
 	}
 	defer resp.Body.Close()
+
+	if c.debug {
+		fmt.Println("Request: ", u.String())
+		fmt.Println("response Status:", resp.Status)
+		fmt.Println("response Headers:", resp.Header)
+		fmt.Println("response Body:", resp.Body)
+	}
+
 	if err := json.NewDecoder(resp.Body).Decode(&dst); err != nil {
 		return err
 	}
@@ -158,6 +180,15 @@ func (c *Client) postJSON(path string, body []byte, dst interface{}) error {
 		return err
 	}
 	defer resp.Body.Close()
+
+	if c.debug {
+		fmt.Println("Request: ", u.String())
+		fmt.Println("Request body: ", string(body))
+		fmt.Println("response Status:", resp.Status)
+		fmt.Println("response Headers:", resp.Header)
+		fmt.Println("response Body:", resp.Body)
+	}
+
 	if err := json.NewDecoder(resp.Body).Decode(&dst); err != nil {
 		return err
 	}
@@ -183,6 +214,15 @@ func (c *Client) postForm(path string, body url.Values, dst interface{}) error {
 		return err
 	}
 	defer resp.Body.Close()
+
+	if c.debug {
+		fmt.Println("Request: ", u.String())
+		fmt.Println("Request body: ", body.Encode())
+		fmt.Println("response Status:", resp.Status)
+		fmt.Println("response Headers:", resp.Header)
+		fmt.Println("response Body:", resp.Body)
+	}
+
 	if err := json.NewDecoder(resp.Body).Decode(&dst); err != nil {
 		return err
 	}
@@ -212,6 +252,14 @@ func (c *Client) deletePrivately(path string, query url.Values, dst interface{})
 		return err
 	}
 	defer resp.Body.Close()
+
+	if c.debug {
+		fmt.Println("Request: ", u.String())
+		fmt.Println("response Status:", resp.Status)
+		fmt.Println("response Headers:", resp.Header)
+		fmt.Println("response Body:", resp.Body)
+	}
+
 	if err := json.NewDecoder(resp.Body).Decode(&dst); err != nil {
 		return err
 	}
