@@ -70,12 +70,7 @@ func (s *FutureCommonService) Balance(coin Coin) (*BalanceResponse, error) {
 // APIKeyResponse :
 type APIKeyResponse struct {
 	CommonResponse `json:",inline"`
-	Result         APIKeResult `json:"result"`
-}
-
-// APIKeResult :
-type APIKeResult struct {
-	APIKey []ApiKey
+	Result         []ApiKey `json:"result"`
 }
 
 type ApiKey struct {
