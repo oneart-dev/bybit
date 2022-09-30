@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"net/url"
 	"strconv"
+
+	"github.com/google/go-querystring/query"
 )
 
 // FutureUSDTPerpetualServiceI :
@@ -16,6 +18,7 @@ type FutureUSDTPerpetualServiceI interface {
 	OpenInterest(OpenInterestParam) (*OpenInterestResponse, error)
 	BigDeal(BigDealParam) (*BigDealResponse, error)
 	AccountRatio(AccountRatioParam) (*AccountRatioResponse, error)
+	ListKline(ListKlineParam) (*ListKlineResponse, error)
 
 	// Account Data Endpoints
 	CreateLinearOrder(CreateLinearOrderParam) (*CreateLinearOrderResponse, error)
@@ -36,6 +39,22 @@ type FutureUSDTPerpetualService struct {
 	client *Client
 
 	*FutureCommonService
+}
+
+// ListKline :
+func (s *FutureUSDTPerpetualService) ListKline(param ListKlineParam) (*ListKlineResponse, error) {
+	var res ListKlineResponse
+
+	queryString, err := query.Values(param)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := s.client.getPublicly("/public/linear/kline", queryString, &res); err != nil {
+		return nil, err
+	}
+
+	return &res, nil
 }
 
 // CreateLinearOrderResponse :
@@ -275,30 +294,12 @@ type LinearExecutionHistoryListParam struct {
 func (s *FutureUSDTPerpetualService) LinearExecutionHistoryList(param LinearExecutionHistoryListParam) (*LinearExecutionHistoryListResponse, error) {
 	var res LinearExecutionHistoryListResponse
 
-	query := url.Values{}
-	query.Add("symbol", string(param.Symbol))
-
-	if param.StartTime != nil {
-		query.Add("start_time", strconv.Itoa(*param.StartTime))
+	queryString, err := query.Values(param)
+	if err != nil {
+		return nil, err
 	}
 
-	if param.EndTime != nil {
-		query.Add("end_time", strconv.Itoa(*param.EndTime))
-	}
-
-	if param.ExecType != nil {
-		query.Add("exec_type", string(*param.ExecType))
-	}
-
-	if param.PageToken != nil {
-		query.Add("page_token", *param.PageToken)
-	}
-
-	if param.Limit != nil {
-		query.Add("limit", strconv.Itoa(*param.Limit))
-	}
-
-	if err := s.client.getPrivately("/private/linear/trade/execution/history-list", query, &res); err != nil {
+	if err := s.client.getPrivately("/private/linear/trade/execution/history-list", queryString, &res); err != nil {
 		return nil, err
 	}
 
@@ -354,30 +355,12 @@ type LinearExecutionListParam struct {
 func (s *FutureUSDTPerpetualService) LinearExecutionList(param LinearExecutionListParam) (*LinearExecutionListResponse, error) {
 	var res LinearExecutionListResponse
 
-	query := url.Values{}
-	query.Add("symbol", string(param.Symbol))
-
-	if param.StartTime != nil {
-		query.Add("start_time", strconv.Itoa(*param.StartTime))
+	queryString, err := query.Values(param)
+	if err != nil {
+		return nil, err
 	}
 
-	if param.EndTime != nil {
-		query.Add("end_time", strconv.Itoa(*param.EndTime))
-	}
-
-	if param.ExecType != nil {
-		query.Add("exec_type", string(*param.ExecType))
-	}
-
-	if param.Page != nil {
-		query.Add("page", strconv.Itoa(*param.Page))
-	}
-
-	if param.Limit != nil {
-		query.Add("limit", strconv.Itoa(*param.Limit))
-	}
-
-	if err := s.client.getPrivately("/private/linear/trade/execution/list", query, &res); err != nil {
+	if err := s.client.getPrivately("/private/linear/trade/execution/list", queryString, &res); err != nil {
 		return nil, err
 	}
 
