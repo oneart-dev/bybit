@@ -74,7 +74,7 @@ type APIKeyResponse struct {
 }
 
 type ApiKey struct {
-	APIKey           float64   `json:"api_key"`
+	APIKey           string    `json:"api_key"`
 	Type             string    `json:"type"`
 	UserID           int       `json:"user_id"`
 	InviterID        int       `json:"inviter_id"`
