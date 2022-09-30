@@ -3,6 +3,7 @@ package bybit
 import (
 	"encoding/json"
 	"net/url"
+	"time"
 
 	"github.com/google/go-querystring/query"
 )
@@ -60,6 +61,45 @@ func (s *FutureCommonService) Balance(coin Coin) (*BalanceResponse, error) {
 	query := url.Values{}
 	query.Add("coin", string(coin))
 	if err := s.client.getPrivately("/v2/private/wallet/balance", query, &res); err != nil {
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+// APIKeyResponse :
+type APIKeyResponse struct {
+	CommonResponse `json:",inline"`
+	Result         APIKeResult `json:"result"`
+}
+
+// APIKeResult :
+type APIKeResult struct {
+	APIKey []ApiKey
+}
+
+type ApiKey struct {
+	APIKey           float64   `json:"api_key"`
+	Type             string    `json:"type"`
+	UserID           int       `json:"user_id"`
+	InviterID        int       `json:"inviter_id"`
+	IPs              []string  `json:"ips"`
+	Note             string    `json:"note"`
+	Permissions      []string  `json:"permissions"`
+	CreatedAt        time.Time `json:"created_at"`
+	ExpiredAt        time.Time `json:"expired_at"`
+	ReadOnly         bool      `json:"read_only"`
+	VipLevel         string    `json:"vip_level"`
+	MarketMakerLevel string    `json:"mkt_maker_level"`
+	AffiliateID      int       `json:"affiliate_id"`
+}
+
+// Balance :
+func (s *FutureCommonService) APIKey() (*APIKeyResponse, error) {
+	var res APIKeyResponse
+
+	query := url.Values{}
+	if err := s.client.getPrivately("/v2/private/account/api-key", query, &res); err != nil {
 		return nil, err
 	}
 

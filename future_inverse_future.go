@@ -16,6 +16,9 @@ type FutureInverseFutureServiceI interface {
 
 	// Wallet Data Endpoints
 	Balance(Coin) (*BalanceResponse, error)
+
+	// Account Data Endpoints
+	APIKey() (*APIKeyResponse, error)
 }
 
 // FutureInverseFutureService :
