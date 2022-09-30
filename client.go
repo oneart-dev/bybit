@@ -5,6 +5,7 @@ import (
 	"crypto/hmac"
 	"crypto/sha256"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -120,6 +121,10 @@ func (c *Client) getPublicly(path string, query url.Values, dst interface{}) err
 		fmt.Println("response Body:", resp.Body)
 	}
 
+	if c.checkResponseForErrors(resp) != nil {
+		return err
+	}
+
 	if err := json.NewDecoder(resp.Body).Decode(&dst); err != nil {
 		return err
 	}
@@ -146,6 +151,10 @@ func (c *Client) getPrivately(path string, query url.Values, dst interface{}) er
 	}
 	defer resp.Body.Close()
 
+	if c.checkResponseForErrors(resp) != nil {
+		return err
+	}
+
 	if c.debug {
 		fmt.Println("Request: ", u.String())
 		fmt.Println("response Status:", resp.Status)
@@ -153,11 +162,35 @@ func (c *Client) getPrivately(path string, query url.Values, dst interface{}) er
 		fmt.Println("response Body:", resp.Body)
 	}
 
+	if c.checkResponseForErrors(resp) != nil {
+		return err
+	}
+
 	if err := json.NewDecoder(resp.Body).Decode(&dst); err != nil {
 		return err
 	}
 
 	return nil
+}
+
+var ErrTooManyRequests = errors.New("too many requests")
+var ErrServerFail = errors.New("server fail")
+
+
+func (c *Client) checkResponseForErrors(resp *http.Response) error {
+	if resp.StatusCode == 200 {
+		return nil
+	}
+
+	if resp.StatusCode == 429 {
+		return ErrTooManyRequests
+	}
+
+	if resp.StatusCode >= 500 {
+		return ErrServerFail
+	}
+
+	return errors.New("request failed: " + resp.Status)
 }
 
 func (c *Client) postJSON(path string, body []byte, dst interface{}) error {
@@ -187,6 +220,10 @@ func (c *Client) postJSON(path string, body []byte, dst interface{}) error {
 		fmt.Println("response Status:", resp.Status)
 		fmt.Println("response Headers:", resp.Header)
 		fmt.Println("response Body:", resp.Body)
+	}
+	
+	if c.checkResponseForErrors(resp) != nil {
+		return err
 	}
 
 	if err := json.NewDecoder(resp.Body).Decode(&dst); err != nil {
@@ -221,6 +258,10 @@ func (c *Client) postForm(path string, body url.Values, dst interface{}) error {
 		fmt.Println("response Status:", resp.Status)
 		fmt.Println("response Headers:", resp.Header)
 		fmt.Println("response Body:", resp.Body)
+	}
+
+	if c.checkResponseForErrors(resp) != nil {
+		return err
 	}
 
 	if err := json.NewDecoder(resp.Body).Decode(&dst); err != nil {
@@ -258,6 +299,10 @@ func (c *Client) deletePrivately(path string, query url.Values, dst interface{})
 		fmt.Println("response Status:", resp.Status)
 		fmt.Println("response Headers:", resp.Header)
 		fmt.Println("response Body:", resp.Body)
+	}
+
+	if c.checkResponseForErrors(resp) != nil {
+		return err
 	}
 
 	if err := json.NewDecoder(resp.Body).Decode(&dst); err != nil {
