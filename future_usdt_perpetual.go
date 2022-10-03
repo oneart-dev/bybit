@@ -280,13 +280,13 @@ type LinearExecutionHistoryListResult struct {
 
 // LinearExecutionHistoryListParam :
 type LinearExecutionHistoryListParam struct {
-	Symbol SymbolUSDT `json:"symbol"`
+	Symbol SymbolUSDT `url:"symbol"`
 
-	StartTime *int      `json:"start_time"`
-	EndTime   *int      `json:"end_time"`
-	ExecType  *ExecType `json:"exec_type"`
-	PageToken *string   `json:"page_token"`
-	Limit     *int      `json:"limit"`
+	StartTime *int      `url:"start_time,omitempty"`
+	EndTime   *int      `url:"end_time,omitempty"`
+	ExecType  *ExecType `url:"exec_type,omitempty"`
+	PageToken *string   `url:"page_token,omitempty"`
+	Limit     *int      `url:"limit,omitempty"`
 }
 
 // LinearExecutionHistoryList :
@@ -341,13 +341,13 @@ type LinearExecutionList struct {
 
 // LinearExecutionListParam :
 type LinearExecutionListParam struct {
-	Symbol SymbolUSDT `json:"symbol"`
+	Symbol SymbolUSDT `url:"symbol"`
 
-	StartTime *int      `json:"start_time"`
-	EndTime   *int      `json:"end_time"`
-	ExecType  *ExecType `json:"exec_type"`
-	Page      *int      `json:"page"`
-	Limit     *int      `json:"limit"`
+	StartTime *int      `url:"start_time,omitempty"`
+	EndTime   *int      `url:"end_time,omitempty"`
+	ExecType  *ExecType `url:"exec_type,omitempty"`
+	Page      *int      `url:"page,omitempty"`
+	Limit     *int      `url:"limit,omitempty"`
 }
 
 // LinearExecutionList :
