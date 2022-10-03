@@ -172,7 +172,7 @@ func (c *Client) checkResponseForErrors(resp *http.Response) error {
 		return nil
 	}
 
-	if resp.StatusCode == 429 {
+	if resp.StatusCode == 429 || resp.StatusCode == 403 {
 		return ErrTooManyRequests
 	}
 
@@ -219,11 +219,12 @@ func (c *Client) postJSON(path string, body []byte, dst interface{}) error {
 
 func (c *Client) debugResponse(resp *http.Response) {
 	if c.debug {
-		fmt.Println("RESPONSE DEBUG INFORMATION:")
-		fmt.Println("Status:", resp.Status)
-		fmt.Println("Headers:", resp.Header)
+		fmt.Println("RESPONSE DEBUG INFORMATION")
+		fmt.Println("Query: ", resp.Request.URL.String())
+		fmt.Println("Status: ", resp.Status)
+		fmt.Println("Headers: ", resp.Header)
 		body, _ := ioutil.ReadAll(resp.Body)
-		fmt.Println("Body:", string(body))
+		fmt.Println("Body: ", string(body))
 		resp.Body = ioutil.NopCloser(bytes.NewReader(body))
 	}
 }
