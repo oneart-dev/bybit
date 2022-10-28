@@ -3,7 +3,6 @@ package bybit
 import (
 	"encoding/json"
 	"net/url"
-	"time"
 
 	"github.com/google/go-querystring/query"
 )
@@ -74,19 +73,19 @@ type APIKeyResponse struct {
 }
 
 type ApiKey struct {
-	APIKey           string    `json:"api_key"`
-	Type             string    `json:"type"`
-	UserID           int       `json:"user_id"`
-	InviterID        int       `json:"inviter_id"`
-	IPs              []string  `json:"ips"`
-	Note             string    `json:"note"`
-	Permissions      []string  `json:"permissions"`
-	CreatedAt        time.Time `json:"created_at"`
-	ExpiredAt        time.Time `json:"expired_at"`
-	ReadOnly         bool      `json:"read_only"`
-	VipLevel         string    `json:"vip_level"`
-	MarketMakerLevel string    `json:"mkt_maker_level"`
-	AffiliateID      int       `json:"affiliate_id"`
+	APIKey           string   `json:"api_key"`
+	Type             string   `json:"type"`
+	UserID           int      `json:"user_id"`
+	InviterID        int      `json:"inviter_id"`
+	IPs              []string `json:"ips"`
+	Note             string   `json:"note"`
+	Permissions      []string `json:"permissions"`
+	CreatedAt        string   `json:"created_at"`
+	ExpiredAt        string   `json:"expired_at"`
+	ReadOnly         bool     `json:"read_only"`
+	VipLevel         string   `json:"vip_level"`
+	MarketMakerLevel string   `json:"mkt_maker_level"`
+	AffiliateID      int      `json:"affiliate_id"`
 }
 
 // Balance :
