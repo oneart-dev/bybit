@@ -31,6 +31,7 @@ type FutureServiceI interface {
 	InversePerpetual() FutureInversePerpetualServiceI
 	USDTPerpetual() FutureUSDTPerpetualServiceI
 	InverseFuture() FutureInverseFutureServiceI
+	Contract() FutureContractServiceI
 }
 
 // FutureService :
@@ -62,9 +63,12 @@ func (s *FutureService) InverseFuture() FutureInverseFutureServiceI {
 	}
 }
 
-// Future :
-func (c *Client) Future() FutureServiceI {
-	return &FutureService{c}
+// ContractFuture :
+func (s *FutureService) ContractFuture() FutureContractServiceI {
+	return &FutureContractService{
+		client:              s.client,
+		FutureCommonService: &FutureCommonService{s.client},
+	}
 }
 
 // Derivative :
