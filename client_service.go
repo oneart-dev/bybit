@@ -39,6 +39,10 @@ type FutureService struct {
 	client *Client
 }
 
+func (c *Client) Future() FutureServiceI {
+	return &FutureService{c}
+}
+
 // InversePerpetual :
 func (s *FutureService) InversePerpetual() FutureInversePerpetualServiceI {
 	return &FutureInversePerpetualService{
@@ -64,7 +68,7 @@ func (s *FutureService) InverseFuture() FutureInverseFutureServiceI {
 }
 
 // ContractFuture :
-func (s *FutureService) ContractFuture() FutureContractServiceI {
+func (s *FutureService) Contract() FutureContractServiceI {
 	return &FutureContractService{
 		client:              s.client,
 		FutureCommonService: &FutureCommonService{s.client},
