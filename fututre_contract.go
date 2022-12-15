@@ -229,7 +229,7 @@ func (s *FutureContractService) Symbols() (*ContractSymbolsResponse, error) {
 // TickersResponse :
 type ContractTickersResponse struct {
 	CommonResponse `json:",inline"`
-	Result         []TickersResult `json:"result"`
+	Result         []ContractTickersResult `json:"result"`
 }
 
 // TickersResult :
