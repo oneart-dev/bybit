@@ -47,7 +47,7 @@ type ContractListKlineResult struct {
 	Category string        `json:"category"`
 	Symbol   SymbolInverse `json:"symbol"`
 	Interval string        `json:"interval"`
-	List     []string      `json:"list"`
+	List     [][]string      `json:"list"`
 }
 
 // ListKline :
