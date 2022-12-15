@@ -129,7 +129,7 @@ func (s *FutureContractService) ContractExecutionHistoryList(param ContractExecu
 // BalanceResponse :
 type ContractBalanceResponse struct {
 	CommonResponse `json:",inline"`
-	Result         BalanceResult `json:"result"`
+	Result         ContractBalanceResult `json:"result"`
 }
 
 // BalanceResult :
@@ -171,7 +171,7 @@ func (s *FutureContractService) Balance(coin Coin) (*ContractBalanceResponse, er
 // SymbolsResponse :
 type ContractSymbolsResponse struct {
 	CommonResponse `json:",inline"`
-	Result         []ContractSymbolData `json:"result"`
+	Result         ContractSymbolData `json:"result"`
 }
 
 type ContractSymbolData struct {
@@ -229,7 +229,7 @@ func (s *FutureContractService) Symbols() (*ContractSymbolsResponse, error) {
 // TickersResponse :
 type ContractTickersResponse struct {
 	CommonResponse `json:",inline"`
-	Result         []ContractTickersResult `json:"result"`
+	Result         ContractTickersResult `json:"result"`
 }
 
 // TickersResult :
