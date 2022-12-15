@@ -47,7 +47,7 @@ type ContractListKlineResult struct {
 	Category string        `json:"category"`
 	Symbol   SymbolInverse `json:"symbol"`
 	Interval string        `json:"interval"`
-	List     [][]string      `json:"list"`
+	List     [][]string    `json:"list"`
 }
 
 // ListKline :
@@ -171,7 +171,7 @@ func (s *FutureContractService) Balance(coin Coin) (*ContractBalanceResponse, er
 // SymbolsResponse :
 type ContractSymbolsResponse struct {
 	CommonResponse `json:",inline"`
-	Result         []SymbolsResult `json:"result"`
+	Result         []ContractSymbolData `json:"result"`
 }
 
 type ContractSymbolData struct {
@@ -239,26 +239,26 @@ type ContractTickersResult struct {
 }
 
 type ContractTicker struct {
-	Symbol               SymbolInverse `json:"symbol"`
-	BidPrice             string        `json:"bidPrice"`
-	AskPrice             string        `json:"askPrice"`
-	LastPrice            string        `json:"lastPrice"`
-	LastTickDirection    TickDirection `json:"lastTickDirection"`
-	PrevPrice24h         string        `json:"prevPrice24h"`
-	Price24hPcnt         string        `json:"price24hPcnt"`
-	HighPrice24h         string        `json:"highPrice24h"`
-	LowPrice24h          string        `json:"lowPrice24h"`
-	PrevPrice1h          string        `json:"prevPrice1h"`
-	MarkPrice            string        `json:"markPrice"`
-	IndexPrice           string        `json:"indexPrice"`
-	OpenInterest         float64       `json:"openInterest"`
-	OpenValue            string        `json:"open_value"`
-	TotalTurnover        string        `json:"turnover24h"`
-	Turnover24h          string        `json:"turnover_24h"`
-	TotalVolume          float64       `json:"total_volume"`
-	Volume24h            float64       `json:"volume24h"`
-	FundingRate          string        `json:"fundingRate"`
-	NextFundingTime      string        `json:"nextFundingTime"`
+	Symbol            SymbolInverse `json:"symbol"`
+	BidPrice          string        `json:"bidPrice"`
+	AskPrice          string        `json:"askPrice"`
+	LastPrice         string        `json:"lastPrice"`
+	LastTickDirection TickDirection `json:"lastTickDirection"`
+	PrevPrice24h      string        `json:"prevPrice24h"`
+	Price24hPcnt      string        `json:"price24hPcnt"`
+	HighPrice24h      string        `json:"highPrice24h"`
+	LowPrice24h       string        `json:"lowPrice24h"`
+	PrevPrice1h       string        `json:"prevPrice1h"`
+	MarkPrice         string        `json:"markPrice"`
+	IndexPrice        string        `json:"indexPrice"`
+	OpenInterest      float64       `json:"openInterest"`
+	OpenValue         string        `json:"open_value"`
+	TotalTurnover     string        `json:"turnover24h"`
+	Turnover24h       string        `json:"turnover_24h"`
+	TotalVolume       float64       `json:"total_volume"`
+	Volume24h         float64       `json:"volume24h"`
+	FundingRate       string        `json:"fundingRate"`
+	NextFundingTime   string        `json:"nextFundingTime"`
 }
 
 // Tickers :
