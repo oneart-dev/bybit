@@ -4,6 +4,7 @@ import (
 	"net/url"
 
 	"github.com/google/go-querystring/query"
+	"github.com/shopspring/decimal"
 )
 
 // FutureContractServiceI :
@@ -79,24 +80,24 @@ type ContractExecutionHistoryListResult struct {
 }
 
 type ContractExecutionList struct {
-	OrderID          string     `json:"orderId"`
-	OrderLinkID      string     `json:"orderLinkId"`
-	Side             Side       `json:"side"`
-	Symbol           SymbolUSDT `json:"symbol"`
-	OrderPrice       float64    `json:"orderPrice"`
-	OrderQty         float64    `json:"orderQty"`
-	OrderType        OrderType  `json:"orderType"`
-	FeeRate          float64    `json:"feeRate"`
-	ExecID           string     `json:"execId"`
-	ExecPrice        float64    `json:"execPrice"`
-	ExecType         ExecType   `json:"execType"`
-	ExecQty          float64    `json:"execQty"`
-	ExecFee          float64    `json:"execFee"`
-	ExecValue        float64    `json:"execValue"`
-	LeavesQty        float64    `json:"leavesQty"`
-	ClosedSize       float64    `json:"closedSize"`
-	LastLiquidityInd string     `json:"lastLiquidityInd"`
-	TradeTimeMs      int64      `json:"execTime"`
+	OrderID          string          `json:"orderId"`
+	OrderLinkID      string          `json:"orderLinkId"`
+	Side             Side            `json:"side"`
+	Symbol           string          `json:"symbol"`
+	OrderPrice       decimal.Decimal `json:"orderPrice"`
+	OrderQty         decimal.Decimal `json:"orderQty"`
+	OrderType        OrderType       `json:"orderType"`
+	FeeRate          decimal.Decimal `json:"feeRate"`
+	ExecID           string          `json:"execId"`
+	ExecPrice        decimal.Decimal `json:"execPrice"`
+	ExecType         ExecType        `json:"execType"`
+	ExecQty          decimal.Decimal `json:"execQty"`
+	ExecFee          decimal.Decimal `json:"execFee"`
+	ExecValue        decimal.Decimal `json:"execValue"`
+	LeavesQty        decimal.Decimal `json:"leavesQty"`
+	ClosedSize       decimal.Decimal `json:"closedSize"`
+	LastLiquidityInd string          `json:"lastLiquidityInd"`
+	TradeTimeMs      string          `json:"execTime"`
 }
 
 // ContractExecutionHistoryListParam :
@@ -139,20 +140,20 @@ type ContractBalanceResult struct {
 
 // Balance :
 type ContractBalance struct {
-	Coin             string  `json:"coin"`
-	Equity           float64 `json:"equity"`
-	AvailableBalance float64 `json:"availableBalance"`
-	UsedMargin       float64 `json:"used_margin"`
-	OrderMargin      float64 `json:"orderMargin"`
-	PositionMargin   float64 `json:"positionMargin"`
-	OccClosingFee    float64 `json:"occClosingFee"`
-	OccFundingFee    float64 `json:"occFundingFee"`
-	WalletBalance    float64 `json:"walletBalance"`
-	RealisedPnl      float64 `json:"realised_pnl"`
-	UnrealisedPnl    float64 `json:"unrealisedPnl"`
-	CumRealisedPnl   float64 `json:"cumRealisedPnl"`
-	GivenCash        float64 `json:"givenCash"`
-	ServiceCash      float64 `json:"serviceCash"`
+	Coin             string          `json:"coin"`
+	Equity           decimal.Decimal `json:"equity"`
+	AvailableBalance decimal.Decimal `json:"availableBalance"`
+	UsedMargin       decimal.Decimal `json:"used_margin"`
+	OrderMargin      decimal.Decimal `json:"orderMargin"`
+	PositionMargin   decimal.Decimal `json:"positionMargin"`
+	OccClosingFee    decimal.Decimal `json:"occClosingFee"`
+	OccFundingFee    decimal.Decimal `json:"occFundingFee"`
+	WalletBalance    decimal.Decimal `json:"walletBalance"`
+	RealisedPnl      decimal.Decimal `json:"realised_pnl"`
+	UnrealisedPnl    decimal.Decimal `json:"unrealisedPnl"`
+	CumRealisedPnl   decimal.Decimal `json:"cumRealisedPnl"`
+	GivenCash        decimal.Decimal `json:"givenCash"`
+	ServiceCash      decimal.Decimal `json:"serviceCash"`
 }
 
 // Balance :
@@ -203,16 +204,16 @@ type ContractPriceFilter struct {
 
 // LotSizeFilter :
 type ContractLotSizeFilter struct {
-	MaxTradingQty float64 `json:"maxTradingQty"`
-	MinTradingQty float64 `json:"minTradingQty"`
-	QtyStep       float64 `json:"qtyStep"`
+	MaxTradingQty string `json:"maxTradingQty"`
+	MinTradingQty string `json:"minTradingQty"`
+	QtyStep       string `json:"qtyStep"`
 }
 
 // LeverageFilter :
 type ContractLeverageFilter struct {
-	MinLeverage  float64 `json:"minLeverage"`
-	MaxLeverage  float64 `json:"maxLeverage"`
-	LeverageStep string  `json:"leverageStep"`
+	MinLeverage  string `json:"minLeverage"`
+	MaxLeverage  string `json:"maxLeverage"`
+	LeverageStep string `json:"leverageStep"`
 }
 
 // Symbols :
@@ -239,7 +240,7 @@ type ContractTickersResult struct {
 }
 
 type ContractTicker struct {
-	Symbol            SymbolInverse `json:"symbol"`
+	Symbol            string        `json:"symbol"`
 	BidPrice          string        `json:"bidPrice"`
 	AskPrice          string        `json:"askPrice"`
 	LastPrice         string        `json:"lastPrice"`
@@ -251,12 +252,12 @@ type ContractTicker struct {
 	PrevPrice1h       string        `json:"prevPrice1h"`
 	MarkPrice         string        `json:"markPrice"`
 	IndexPrice        string        `json:"indexPrice"`
-	OpenInterest      float64       `json:"openInterest"`
+	OpenInterest      string        `json:"openInterest"`
 	OpenValue         string        `json:"open_value"`
 	TotalTurnover     string        `json:"turnover24h"`
 	Turnover24h       string        `json:"turnover_24h"`
-	TotalVolume       float64       `json:"total_volume"`
-	Volume24h         float64       `json:"volume24h"`
+	TotalVolume       string        `json:"total_volume"`
+	Volume24h         string        `json:"volume24h"`
 	FundingRate       string        `json:"fundingRate"`
 	NextFundingTime   string        `json:"nextFundingTime"`
 }
