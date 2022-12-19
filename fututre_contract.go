@@ -76,7 +76,7 @@ type ContractExecutionHistoryListResponse struct {
 // ContractExecutionHistoryListResult :
 type ContractExecutionHistoryListResult struct {
 	PageToken              string                  `json:"nextPageCursor"`
-	ContractExecutionLists []ContractExecutionList `json:"data"`
+	ContractExecutionLists []ContractExecutionList `json:"list"`
 }
 
 type ContractExecutionList struct {
