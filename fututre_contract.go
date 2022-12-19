@@ -135,7 +135,7 @@ type ContractBalanceResponse struct {
 
 // BalanceResult :
 type ContractBalanceResult struct {
-	Balance []Balance `json:"list"`
+	Balance []ContractBalance `json:"list"`
 }
 
 // Balance :
