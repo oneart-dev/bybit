@@ -13,6 +13,7 @@ type V5OrderServiceI interface {
 	CancelOrder(V5CancelOrderParam) (*V5CancelOrderResponse, error)
 	GetOpenOrders(V5GetOpenOrdersParam) (*V5GetOpenOrdersResponse, error)
 	GetExecutionList(V5GetExecutionListParam) (*V5GetExecutionListResponse, error)
+	GetOrderList(param V5GetOrderListParam) (*V5GetOrderListResponse, error)
 }
 
 // V5OrderService :
@@ -264,6 +265,90 @@ func (s *V5OrderService) GetExecutionList(param V5GetExecutionListParam) (*V5Get
 	}
 
 	if err := s.client.getV5Privately("/v5/execution/list", queryString, &res); err != nil {
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+type V5GetOrderListParam struct {
+	Category CategoryV5 `url:"category"`
+
+	StartTime   *int      `url:"startTime,omitempty"`
+	EndTime     *int      `url:"endTime,omitempty"`
+	ExecType    *ExecType `url:"execType,omitempty"`
+	Symbol      *SymbolV5 `url:"symbol,omitempty"`
+	BaseCoin    *Coin     `url:"baseCoin,omitempty"`
+	OrderID     *string   `url:"orderId,omitempty"`
+	OrderLinkID *string   `url:"orderLinkId,omitempty"`
+	Limit       *int      `url:"limit,omitempty"`
+	Cursor      *string   `url:"cursor,omitempty"`
+}
+
+// V5GetOpenOrdersResponse :
+type V5GetOrderListResponse struct {
+	CommonV5Response `json:",inline"`
+	Result           V5GetOrderListResult `json:"result"`
+}
+
+// V5GetOpenOrdersResult :
+type V5GetOrderListResult struct {
+	Category       CategoryV5   `json:"category"`
+	NextPageCursor string       `json:"nextPageCursor"`
+	List           []V5GetOrder `json:"list"`
+}
+
+type V5GetOrder struct {
+	Symbol      SymbolV5  `json:"symbol"`
+	OrderType   OrderType `json:"orderType"`
+	OrderLinkID string    `json:"orderLinkId"`
+	OrderID     string    `json:"orderId"`
+
+	AvgPrice           string `json:"avgPrice"`
+	StopOrderType      string `json:"stopOrderType"`
+	LastPriceOnCreated string `json:"lastPriceOnCreated"`
+	OrderStatus        string `json:"orderStatus"`
+	TakeProfit         string `json:"takeProfit"`
+	CumExecValue       string `json:"cumExecValue"`
+	TriggerDirection   int    `json:"triggerDirection"`
+	BlockTradeID       string `json:"blockTradeId"`
+	RejectReason       string `json:"rejectReason"`
+	IsLeverage         string `json:"isLeverage"`
+	Price              string `json:"price"`
+	OrderIV            string `json:"orderIv"`
+	CreatedTime        string `json:"createdTime"`
+	TPTriggerBy        string `json:"tpTriggerBy"`
+	PositionIdx        int    `json:"positionIdx"`
+	TimeInForce        string `json:"timeInForce"`
+	LeavesValue        string `json:"leavesValue"`
+	UpdatedTime        string `json:"updatedTime"`
+	Side               Side   `json:"side"`
+	TriggerPrice       string `json:"triggerPrice"`
+	CumExecFee         string `json:"cumExecFee"`
+	SLTriggerBy        string `json:"slTriggerBy"`
+	LeavesQty          string `json:"leavesQty"`
+	CloseOnTrigger     bool   `json:"closeOnTrigger"`
+	CumExecQty         string `json:"cumExecQty"`
+	ReduceOnly         bool   `json:"reduceOnly"`
+	Qty                string `json:"qty"`
+	StopLoss           string `json:"stopLoss"`
+	TriggerBy          string `json:"triggerBy"`
+}
+
+// GetOrderList :
+func (s *V5OrderService) GetOrderList(param V5GetOrderListParam) (*V5GetOrderListResponse, error) {
+	var res V5GetOrderListResponse
+
+	if param.Category == "" {
+		return nil, fmt.Errorf("category needed")
+	}
+
+	queryString, err := query.Values(param)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := s.client.getV5Privately("/v5/order/history", queryString, &res); err != nil {
 		return nil, err
 	}
 
