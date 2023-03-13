@@ -4,11 +4,11 @@ import (
 	"bytes"
 	"crypto/hmac"
 	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"net/url"
 	"sort"
@@ -20,34 +20,35 @@ import (
 const (
 	// MainNetBaseURL :
 	MainNetBaseURL = "https://api.bybit.com"
+	// MainNetBaseURL2 :
+	MainNetBaseURL2 = "https://api.bytick.com"
 )
 
 // Client :
 type Client struct {
-	baseURL    string
-	key        string
-	secret     string
 	httpClient *http.Client
-	debug      bool
+
+	baseURL string
+	key     string
+	secret  string
+
+	checkResponseBody checkResponseBodyFunc
 }
 
 // NewClient :
 func NewClient() *Client {
 	return &Client{
-		baseURL:    MainNetBaseURL,
 		httpClient: &http.Client{},
-	}
-}
 
-// SetDebug :
-func (c *Client) Debug() *Client {
-	c.debug = true
-	return c
+		baseURL:           MainNetBaseURL,
+		checkResponseBody: checkResponseBody,
+	}
 }
 
 // WithHTTPClient :
 func (c *Client) WithHTTPClient(httpClient *http.Client) *Client {
 	c.httpClient = httpClient
+
 	return c
 }
 
@@ -57,6 +58,54 @@ func (c *Client) WithAuth(key string, secret string) *Client {
 	c.secret = secret
 
 	return c
+}
+
+func (c Client) withCheckResponseBody(f checkResponseBodyFunc) *Client {
+	c.checkResponseBody = f
+
+	return &c
+}
+
+// WithBaseURL :
+func (c *Client) WithBaseURL(url string) *Client {
+	c.baseURL = url
+
+	return c
+}
+
+// Request :
+func (c *Client) Request(req *http.Request, dst interface{}) error {
+	resp, err := c.httpClient.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	switch {
+	case 200 <= resp.StatusCode && resp.StatusCode <= 299:
+		body, err := io.ReadAll(resp.Body)
+		if err != nil {
+			return err
+		}
+
+		if c.checkResponseBody == nil {
+			return errors.New("checkResponseBody func should be set")
+		}
+		if err := c.checkResponseBody(body); err != nil {
+			return err
+		}
+
+		if err := json.Unmarshal(body, &dst); err != nil {
+			return err
+		}
+		return nil
+	case resp.StatusCode == http.StatusForbidden:
+		return ErrAccessDenied
+	case resp.StatusCode == http.StatusNotFound:
+		return ErrPathNotFound
+	default:
+		return errors.New("unexpected error")
+	}
 }
 
 // hasAuth : check has auth key and secret
@@ -77,6 +126,53 @@ func (c *Client) populateSignature(src url.Values) url.Values {
 	src.Add("sign", getSignature(src, c.secret))
 
 	return src
+}
+
+func (c *Client) populateSignatureForBody(src []byte) []byte {
+	intNow := int(time.Now().UTC().UnixNano() / int64(time.Millisecond))
+	now := strconv.Itoa(intNow)
+
+	body := map[string]interface{}{}
+	if err := json.Unmarshal(src, &body); err != nil {
+		panic(err)
+	}
+
+	body["api_key"] = c.key
+	body["timestamp"] = now
+	body["sign"] = getSignatureForBody(body, c.secret)
+
+	result, err := json.Marshal(body)
+	if err != nil {
+		panic(err)
+	}
+
+	return result
+}
+
+func getV5Signature(
+	timestamp int,
+	key string,
+	queryString string,
+	secret string,
+) string {
+	val := strconv.Itoa(timestamp) + key
+	val = val + queryString
+	h := hmac.New(sha256.New, []byte(secret))
+	h.Write([]byte(val))
+	return hex.EncodeToString(h.Sum(nil))
+}
+
+func getV5SignatureForBody(
+	timestamp int,
+	key string,
+	body []byte,
+	secret string,
+) string {
+	val := strconv.Itoa(timestamp) + key
+	val = val + string(body)
+	h := hmac.New(sha256.New, []byte(secret))
+	h.Write([]byte(val))
+	return hex.EncodeToString(h.Sum(nil))
 }
 
 func getSignature(src url.Values, key string) string {
@@ -101,6 +197,28 @@ func getSignature(src url.Values, key string) string {
 	return fmt.Sprintf("%x", h.Sum(nil))
 }
 
+func getSignatureForBody(src map[string]interface{}, key string) string {
+	keys := make([]string, len(src))
+	i := 0
+	_val := ""
+	for k := range src {
+		keys[i] = k
+		i++
+	}
+	sort.Strings(keys)
+	for _, k := range keys {
+		_val += k + "=" + fmt.Sprintf("%v", src[k]) + "&"
+	}
+	_val = _val[0 : len(_val)-1]
+	h := hmac.New(sha256.New, []byte(key))
+	_, err := io.WriteString(h, _val)
+	if err != nil {
+		panic(err)
+	}
+
+	return fmt.Sprintf("%x", h.Sum(nil))
+}
+
 func (c *Client) getPublicly(path string, query url.Values, dst interface{}) error {
 	u, err := url.Parse(c.baseURL)
 	if err != nil {
@@ -109,19 +227,12 @@ func (c *Client) getPublicly(path string, query url.Values, dst interface{}) err
 	u.Path = path
 	u.RawQuery = query.Encode()
 
-	resp, err := c.httpClient.Get(u.String())
+	req, err := http.NewRequest(http.MethodGet, u.String(), nil)
 	if err != nil {
 		return err
 	}
-	defer resp.Body.Close()
 
-	c.debugResponse(resp)
-
-	if c.checkResponseForErrors(resp) != nil {
-		return err
-	}
-
-	if err := json.NewDecoder(resp.Body).Decode(&dst); err != nil {
+	if err := c.Request(req, &dst); err != nil {
 		return err
 	}
 
@@ -141,46 +252,46 @@ func (c *Client) getPrivately(path string, query url.Values, dst interface{}) er
 	query = c.populateSignature(query)
 	u.RawQuery = query.Encode()
 
-	resp, err := c.httpClient.Get(u.String())
+	req, err := http.NewRequest(http.MethodGet, u.String(), nil)
 	if err != nil {
 		return err
 	}
-	defer resp.Body.Close()
 
-	if c.checkResponseForErrors(resp) != nil {
-		return err
-	}
-
-	c.debugResponse(resp)
-
-	if c.checkResponseForErrors(resp) != nil {
-		return err
-	}
-
-	if err := json.NewDecoder(resp.Body).Decode(&dst); err != nil {
+	if err := c.Request(req, &dst); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-var ErrTooManyRequests = errors.New("too many requests")
-var ErrServerFail = errors.New("server fail")
-
-func (c *Client) checkResponseForErrors(resp *http.Response) error {
-	if resp.StatusCode == 200 {
-		return nil
+func (c *Client) getV5Privately(path string, query url.Values, dst interface{}) error {
+	if !c.hasAuth() {
+		return fmt.Errorf("this is private endpoint, please set api key and secret")
 	}
 
-	if resp.StatusCode == 429 || resp.StatusCode == 403 {
-		return ErrTooManyRequests
+	u, err := url.Parse(c.baseURL)
+	if err != nil {
+		return err
+	}
+	u.Path = path
+	u.RawQuery = query.Encode()
+
+	timestamp := int(time.Now().UTC().UnixNano() / int64(time.Millisecond))
+	sign := getV5Signature(timestamp, c.key, query.Encode(), c.secret)
+
+	req, err := http.NewRequest(http.MethodGet, u.String(), nil)
+	if err != nil {
+		return err
+	}
+	req.Header.Set("X-BAPI-API-KEY", c.key)
+	req.Header.Set("X-BAPI-TIMESTAMP", strconv.Itoa(timestamp))
+	req.Header.Set("X-BAPI-SIGN", sign)
+
+	if err := c.Request(req, &dst); err != nil {
+		return err
 	}
 
-	if resp.StatusCode >= 500 {
-		return ErrServerFail
-	}
-
-	return errors.New("request failed: " + resp.Status)
+	return nil
 }
 
 func (c *Client) postJSON(path string, body []byte, dst interface{}) error {
@@ -194,39 +305,49 @@ func (c *Client) postJSON(path string, body []byte, dst interface{}) error {
 	}
 	u.Path = path
 
-	query := url.Values{}
-	query = c.populateSignature(query)
-	u.RawQuery = query.Encode()
+	body = c.populateSignatureForBody(body)
 
-	resp, err := c.httpClient.Post(u.String(), "application/json", bytes.NewBuffer(body))
+	req, err := http.NewRequest(http.MethodPost, u.String(), bytes.NewBuffer(body))
 	if err != nil {
 		return err
 	}
-	defer resp.Body.Close()
+	req.Header.Set("Content-Type", "application/json")
 
-	c.debugResponse(resp)
-
-	if c.checkResponseForErrors(resp) != nil {
-		return err
-	}
-
-	if err := json.NewDecoder(resp.Body).Decode(&dst); err != nil {
+	if err := c.Request(req, &dst); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (c *Client) debugResponse(resp *http.Response) {
-	if c.debug {
-		fmt.Println("RESPONSE DEBUG INFORMATION")
-		fmt.Println("Query: ", resp.Request.URL.String())
-		fmt.Println("Status: ", resp.Status)
-		fmt.Println("Headers: ", resp.Header)
-		body, _ := ioutil.ReadAll(resp.Body)
-		fmt.Println("Body: ", string(body))
-		resp.Body = ioutil.NopCloser(bytes.NewReader(body))
+func (c *Client) postV5JSON(path string, body []byte, dst interface{}) error {
+	if !c.hasAuth() {
+		return fmt.Errorf("this is private endpoint, please set api key and secret")
 	}
+
+	u, err := url.Parse(c.baseURL)
+	if err != nil {
+		return err
+	}
+	u.Path = path
+
+	timestamp := int(time.Now().UTC().UnixNano() / int64(time.Millisecond))
+	sign := getV5SignatureForBody(timestamp, c.key, body, c.secret)
+
+	req, err := http.NewRequest(http.MethodPost, u.String(), bytes.NewBuffer(body))
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("X-BAPI-API-KEY", c.key)
+	req.Header.Set("X-BAPI-TIMESTAMP", strconv.Itoa(timestamp))
+	req.Header.Set("X-BAPI-SIGN", sign)
+
+	if err := c.Request(req, &dst); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (c *Client) postForm(path string, body url.Values, dst interface{}) error {
@@ -242,19 +363,16 @@ func (c *Client) postForm(path string, body url.Values, dst interface{}) error {
 
 	body = c.populateSignature(body)
 
-	resp, err := c.httpClient.Post(u.String(), "application/x-www-form-urlencoded", strings.NewReader(body.Encode()))
+	req, err := http.NewRequest(http.MethodPost, u.String(), strings.NewReader(body.Encode()))
 	if err != nil {
 		return err
 	}
-	defer resp.Body.Close()
-
-	c.debugResponse(resp)
-
-	if c.checkResponseForErrors(resp) != nil {
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	if err != nil {
 		return err
 	}
 
-	if err := json.NewDecoder(resp.Body).Decode(&dst); err != nil {
+	if err := c.Request(req, &dst); err != nil {
 		return err
 	}
 
@@ -278,19 +396,8 @@ func (c *Client) deletePrivately(path string, query url.Values, dst interface{})
 	if err != nil {
 		return err
 	}
-	resp, err := c.httpClient.Do(req)
-	if err != nil {
-		return err
-	}
-	defer resp.Body.Close()
 
-	c.debugResponse(resp)
-
-	if c.checkResponseForErrors(resp) != nil {
-		return err
-	}
-
-	if err := json.NewDecoder(resp.Body).Decode(&dst); err != nil {
+	if err := c.Request(req, &dst); err != nil {
 		return err
 	}
 
