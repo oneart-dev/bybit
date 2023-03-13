@@ -32,6 +32,8 @@ type Client struct {
 	key     string
 	secret  string
 
+	debug bool
+
 	checkResponseBody checkResponseBodyFunc
 }
 
@@ -51,6 +53,14 @@ func (c *Client) WithHTTPClient(httpClient *http.Client) *Client {
 
 	return c
 }
+
+// WithHTTPClient :
+func (c *Client) Debug() *Client {
+	c.debug = true
+
+	return c
+}
+
 
 // WithAuth :
 func (c *Client) WithAuth(key string, secret string) *Client {
@@ -81,17 +91,32 @@ type RateLimitHeaders struct {
 
 // Request :
 func (c *Client) V5Request(req *http.Request, dst interface{}) error {
+
+	if c.debug {
+		fmt.Println(req.URL.String())
+	}
+
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
 		return err
 	}
 	defer resp.Body.Close()
 
+	if c.debug {
+		fmt.Println(resp)
+	}
+
 	headers := RateLimitHeaders{}
 
 	switch {
 	case 200 <= resp.StatusCode && resp.StatusCode <= 299:
 		body, err := io.ReadAll(resp.Body)
+
+		if c.debug {
+			fmt.Println(string(body))
+			fmt.Println(err)
+		}
+
 		if err != nil {
 			return err
 		}
