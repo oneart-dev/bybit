@@ -95,10 +95,13 @@ type CommonV3Response struct {
 
 // CommonV5Response :
 type CommonV5Response struct {
-	RetCode    int         `json:"retCode"`
-	RetMsg     string      `json:"retMsg"`
-	RetExtInfo interface{} `json:"retExtInfo"`
-	Time       int         `json:"time"`
+	RetCode          int         `json:"retCode"`
+	RetMsg           string      `json:"retMsg"`
+	RetExtInfo       interface{} `json:"retExtInfo"`
+	Time             int         `json:"time"`
+	RateLimitStatus  int         `json:"rate_limit_status"`
+	RateLimitResetMs int         `json:"rate_limit_reset_ms"`
+	RateLimit        int         `json:"rate_limit"`
 }
 
 // ErrorResponse :

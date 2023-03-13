@@ -73,6 +73,69 @@ func (c *Client) WithBaseURL(url string) *Client {
 	return c
 }
 
+type RateLimitHeaders struct {
+	RateLimitStatus  int    `json:"rate_limit_status"`
+	RateLimitResetMs int    `json:"rate_limit_reset_ms"`
+	RateLimit        int    `json:"rate_limit"`
+}
+
+// Request :
+func (c *Client) V5Request(req *http.Request, dst interface{}) error {
+	resp, err := c.httpClient.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	headers := RateLimitHeaders{}
+
+	switch {
+	case 200 <= resp.StatusCode && resp.StatusCode <= 299:
+		body, err := io.ReadAll(resp.Body)
+		if err != nil {
+			return err
+		}
+
+		if c.checkResponseBody == nil {
+			return errors.New("checkResponseBody func should be set")
+		}
+		if err := c.checkResponseBody(body); err != nil {
+			return err
+		}
+
+		if err := json.Unmarshal(body, &dst); err != nil {
+			return err
+		}
+
+		// headers.RateLimitStatus =
+		if v, err := strconv.Atoi(resp.Request.Header.Get("X-Bapi-Limit-Status")); err == nil {
+			headers.RateLimitStatus = v
+		}
+
+		if v, err := strconv.Atoi(resp.Request.Header.Get("X-Bapi-Limit-Reset-Timestamp")); err == nil {
+			headers.RateLimitResetMs = v
+		}
+
+		if v, err := strconv.Atoi(resp.Request.Header.Get("X-Bapi-Limit")); err == nil {
+			headers.RateLimit = v
+		}
+
+		if h, err := json.Marshal(headers); err == nil {
+			if err := json.Unmarshal(h, &dst); err != nil {
+				return err
+			}
+		}
+
+		return nil
+	case resp.StatusCode == http.StatusForbidden:
+		return ErrAccessDenied
+	case resp.StatusCode == http.StatusNotFound:
+		return ErrPathNotFound
+	default:
+		return errors.New("unexpected error")
+	}
+}
+
 // Request :
 func (c *Client) Request(req *http.Request, dst interface{}) error {
 	resp, err := c.httpClient.Do(req)
@@ -287,7 +350,7 @@ func (c *Client) getV5Privately(path string, query url.Values, dst interface{}) 
 	req.Header.Set("X-BAPI-TIMESTAMP", strconv.Itoa(timestamp))
 	req.Header.Set("X-BAPI-SIGN", sign)
 
-	if err := c.Request(req, &dst); err != nil {
+	if err := c.V5Request(req, &dst); err != nil {
 		return err
 	}
 
