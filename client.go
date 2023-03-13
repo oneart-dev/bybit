@@ -157,6 +157,13 @@ func (c *Client) V5Request(req *http.Request, dst interface{}) error {
 	case resp.StatusCode == http.StatusNotFound:
 		return ErrPathNotFound
 	default:
+
+		body, err := io.ReadAll(resp.Body)
+		if c.debug {
+			fmt.Println(string(body))
+			fmt.Println(err)
+		}
+
 		return errors.New("unexpected error")
 	}
 }
