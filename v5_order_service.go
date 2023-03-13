@@ -12,6 +12,7 @@ type V5OrderServiceI interface {
 	CreateOrder(V5CreateOrderParam) (*V5CreateOrderResponse, error)
 	CancelOrder(V5CancelOrderParam) (*V5CancelOrderResponse, error)
 	GetOpenOrders(V5GetOpenOrdersParam) (*V5GetOpenOrdersResponse, error)
+	GetExecutionList(V5GetExecutionListParam) (*V5GetExecutionListResponse, error)
 }
 
 // V5OrderService :
