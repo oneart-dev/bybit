@@ -374,52 +374,30 @@ type V5GetClosedPnlResponse struct {
 
 // V5GetOpenOrdersResult :
 type V5GetClosedPnlResult struct {
-	Category       CategoryV5   `json:"category"`
-	NextPageCursor string       `json:"nextPageCursor"`
-	List           []V5GetOrder `json:"list"`
+	Category       CategoryV5       `json:"category"`
+	NextPageCursor string           `json:"nextPageCursor"`
+	List           []V5GetClosedPnl `json:"list"`
 }
-
-/*
-{
-                "symbol": "ETHPERP",
-                "orderType": "Market",
-                "leverage": "3",
-                "updatedTime": "1672214887236",
-                "side": "Sell",
-                "orderId": "5a373bfe-188d-4913-9c81-d57ab5be8068",
-                "closedPnl": "-47.4065323",
-                "avgEntryPrice": "1194.97516667",
-                "qty": "3",
-                "cumEntryValue": "3584.9255",
-                "createdTime": "1672214887231423699",
-                "orderPrice": "1122.95",
-                "closedSize": "3",
-                "avgExitPrice": "1180.59833333",
-                "execType": "Trade",
-                "fillCount": "4",
-                "cumExitValue": "3541.795"
-            }
-*/
 
 type V5GetClosedPnl struct {
 	Symbol    SymbolV5  `json:"symbol"`
 	OrderType OrderType `json:"orderType"`
 	OrderID   string    `json:"orderId"`
 
-	Leverage    string `json:"leverage"`
-	UpdatedTime string `json:"updatedTime"`
-	Side        Side   `json:"side"`
-	ClosedPnl   string `json:"closedPnl"`
+	Leverage      string `json:"leverage"`
+	UpdatedTime   string `json:"updatedTime"`
+	Side          Side   `json:"side"`
+	ClosedPnl     string `json:"closedPnl"`
 	AvgEntryPrice string `json:"avgEntryPrice"`
-	Qty         string `json:"qty"`
+	Qty           string `json:"qty"`
 	CumEntryValue string `json:"cumEntryValue"`
-	CreatedTime string `json:"createdTime"`
-	OrderPrice  string `json:"orderPrice"`
-	ClosedSize  string `json:"closedSize"`
-	AvgExitPrice string `json:"avgExitPrice"`
-	ExecType    string `json:"execType"`
-	FillCount   string `json:"fillCount"`
-	CumExitValue string `json:"cumExitValue"`
+	CreatedTime   string `json:"createdTime"`
+	OrderPrice    string `json:"orderPrice"`
+	ClosedSize    string `json:"closedSize"`
+	AvgExitPrice  string `json:"avgExitPrice"`
+	ExecType      string `json:"execType"`
+	FillCount     string `json:"fillCount"`
+	CumExitValue  string `json:"cumExitValue"`
 }
 
 // GetOrderList :
