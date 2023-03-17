@@ -24,6 +24,12 @@ const (
 	MainNetBaseURL2 = "https://api.bytick.com"
 )
 
+type Logger interface {
+	Debugf(template string, args ...interface{})
+	Infof(template string, args ...interface{})
+	Errorf(template string, args ...interface{})
+}
+
 // Client :
 type Client struct {
 	httpClient *http.Client
@@ -32,7 +38,8 @@ type Client struct {
 	key     string
 	secret  string
 
-	debug bool
+	debug  bool
+	logger Logger
 
 	checkResponseBody checkResponseBodyFunc
 }
@@ -55,12 +62,12 @@ func (c *Client) WithHTTPClient(httpClient *http.Client) *Client {
 }
 
 // WithHTTPClient :
-func (c *Client) Debug() *Client {
+func (c *Client) Debug(logger Logger) *Client {
 	c.debug = true
+	c.logger = logger
 
 	return c
 }
-
 
 // WithAuth :
 func (c *Client) WithAuth(key string, secret string) *Client {
@@ -84,16 +91,16 @@ func (c *Client) WithBaseURL(url string) *Client {
 }
 
 type RateLimitHeaders struct {
-	RateLimitStatus  int    `json:"rate_limit_status"`
-	RateLimitResetMs int    `json:"rate_limit_reset_ms"`
-	RateLimit        int    `json:"rate_limit"`
+	RateLimitStatus  int `json:"rate_limit_status"`
+	RateLimitResetMs int `json:"rate_limit_reset_ms"`
+	RateLimit        int `json:"rate_limit"`
 }
 
 // Request :
 func (c *Client) V5Request(req *http.Request, dst interface{}) error {
 
 	if c.debug {
-		fmt.Println(req.URL.String())
+		c.logger.Debugf("Request url: %s", req.URL.String())
 	}
 
 	resp, err := c.httpClient.Do(req)
@@ -103,7 +110,7 @@ func (c *Client) V5Request(req *http.Request, dst interface{}) error {
 	defer resp.Body.Close()
 
 	if c.debug {
-		fmt.Println(resp)
+		c.logger.Debugf("Response: %v", resp)
 	}
 
 	headers := RateLimitHeaders{}
@@ -113,11 +120,11 @@ func (c *Client) V5Request(req *http.Request, dst interface{}) error {
 		body, err := io.ReadAll(resp.Body)
 
 		if c.debug {
-			fmt.Println(string(body))
-			fmt.Println(err)
+			c.logger.Debugf("Body: %s", string(body))
 		}
 
 		if err != nil {
+			c.logger.Errorf("Error: %s", err.Error())
 			return err
 		}
 
@@ -160,8 +167,11 @@ func (c *Client) V5Request(req *http.Request, dst interface{}) error {
 
 		body, err := io.ReadAll(resp.Body)
 		if c.debug {
-			fmt.Println(string(body))
-			fmt.Println(err)
+			c.logger.Debugf("Body: %v", string(body))
+		}
+
+		if err != nil  && c.debug {
+			c.logger.Errorf("Error: %s", err.Error())
 		}
 
 		return errors.New("unexpected error")
@@ -170,16 +180,30 @@ func (c *Client) V5Request(req *http.Request, dst interface{}) error {
 
 // Request :
 func (c *Client) Request(req *http.Request, dst interface{}) error {
+
+	if c.debug {
+		c.logger.Debugf("Request url: %s", req.URL.String())
+	}
+
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
 		return err
 	}
 	defer resp.Body.Close()
 
+	if c.debug {
+		c.logger.Debugf("Response: %v", resp)
+	}
+
 	switch {
 	case 200 <= resp.StatusCode && resp.StatusCode <= 299:
 		body, err := io.ReadAll(resp.Body)
+		if c.debug {
+			c.logger.Debugf("Body: %s", string(body))
+		}
+
 		if err != nil {
+			c.logger.Errorf("Error: %s", err.Error())
 			return err
 		}
 
@@ -195,10 +219,26 @@ func (c *Client) Request(req *http.Request, dst interface{}) error {
 		}
 		return nil
 	case resp.StatusCode == http.StatusForbidden:
+		if c.debug {
+			c.logger.Errorf("Error: %d", http.StatusForbidden)
+		}
 		return ErrAccessDenied
 	case resp.StatusCode == http.StatusNotFound:
+		if c.debug {
+			c.logger.Errorf("Error: %d", http.StatusNotFound)
+		}
 		return ErrPathNotFound
 	default:
+
+		body, err := io.ReadAll(resp.Body)
+		if c.debug {
+			c.logger.Debugf("Body: %v", string(body))
+		}
+
+		if err != nil  && c.debug {
+			c.logger.Errorf("Error: %s", err.Error())
+		}
+
 		return errors.New("unexpected error")
 	}
 }
