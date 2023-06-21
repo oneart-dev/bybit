@@ -250,6 +250,7 @@ type V5GetExecutionOrder struct {
 	ExecValue     string    `json:"execValue"`
 	ExecType      ExecType  `json:"execType"`
 	ExecQty       string    `json:"execQty"`
+	ClosedSize    string    `json:"closedSize"`
 }
 
 // GetExecutionList :
