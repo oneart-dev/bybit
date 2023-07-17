@@ -206,6 +206,7 @@ func (s *V5OrderService) GetOpenOrders(param V5GetOpenOrdersParam) (*V5GetOpenOr
 type V5GetExecutionListParam struct {
 	Category CategoryV5 `url:"category"`
 
+	PreUpgrade  *bool  
 	StartTime   *int      `url:"startTime,omitempty"`
 	EndTime     *int      `url:"endTime,omitempty"`
 	ExecType    *ExecType `url:"execType,omitempty"`
@@ -257,6 +258,11 @@ type V5GetExecutionOrder struct {
 func (s *V5OrderService) GetExecutionList(param V5GetExecutionListParam) (*V5GetExecutionListResponse, error) {
 	var res V5GetExecutionListResponse
 
+	url := "/v5/execution/list"
+	if param.PreUpgrade != nil && *param.PreUpgrade {
+		url = "/v5/pre-upgrade/execution/list"
+	}
+
 	if param.Category == "" {
 		return nil, fmt.Errorf("category needed")
 	}
@@ -266,7 +272,7 @@ func (s *V5OrderService) GetExecutionList(param V5GetExecutionListParam) (*V5Get
 		return nil, err
 	}
 
-	if err := s.client.getV5Privately("/v5/execution/list", queryString, &res); err != nil {
+	if err := s.client.getV5Privately(url, queryString, &res); err != nil {
 		return nil, err
 	}
 
