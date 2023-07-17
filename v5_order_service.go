@@ -206,7 +206,7 @@ func (s *V5OrderService) GetOpenOrders(param V5GetOpenOrdersParam) (*V5GetOpenOr
 type V5GetExecutionListParam struct {
 	Category CategoryV5 `url:"category"`
 
-	PreUpgrade  *bool  
+	PreUpgrade  *bool     `url:"-"`
 	StartTime   *int      `url:"startTime,omitempty"`
 	EndTime     *int      `url:"endTime,omitempty"`
 	ExecType    *ExecType `url:"execType,omitempty"`
