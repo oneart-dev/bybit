@@ -124,7 +124,9 @@ func (c *Client) V5Request(req *http.Request, dst interface{}) error {
 		}
 
 		if err != nil {
-			c.logger.Errorf("Error: %s", err.Error())
+			if c.debug {
+				c.logger.Errorf("Error: %s", err.Error())
+			}
 			return err
 		}
 
@@ -170,7 +172,7 @@ func (c *Client) V5Request(req *http.Request, dst interface{}) error {
 			c.logger.Debugf("Body: %v", string(body))
 		}
 
-		if err != nil  && c.debug {
+		if err != nil && c.debug {
 			c.logger.Errorf("Error: %s", err.Error())
 		}
 
@@ -203,7 +205,9 @@ func (c *Client) Request(req *http.Request, dst interface{}) error {
 		}
 
 		if err != nil {
-			c.logger.Errorf("Error: %s", err.Error())
+			if c.debug {
+				c.logger.Errorf("Error: %s", err.Error())
+			}
 			return err
 		}
 
@@ -235,7 +239,7 @@ func (c *Client) Request(req *http.Request, dst interface{}) error {
 			c.logger.Debugf("Body: %v", string(body))
 		}
 
-		if err != nil  && c.debug {
+		if err != nil && c.debug {
 			c.logger.Errorf("Error: %s", err.Error())
 		}
 
